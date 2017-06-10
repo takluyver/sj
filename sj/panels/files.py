@@ -86,14 +86,14 @@ class FilesTreeView(MultiDragDropTreeView):
         namecol.add_attribute(name_renderer, "text", 0)
         self.append_column(Gtk.TreeViewColumn("Size", Gtk.CellRendererText(), text=2))
 
-        window.connect('wd_changed', self.wd_changed)
+        window.connect('prompt', self.prompt)
 
         self.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK,
             [('text/uri-list', 0, 1)],  Gdk.DragAction.COPY)
         self.connect("drag-data-get", self.on_drag_data_get)
 
-    def wd_changed(self, _, wd):
-        new_files_store = make_list_store(wd)
+    def prompt(self, window):
+        new_files_store = make_list_store(window.cwd)
         self.set_model(new_files_store)
 
     def on_drag_data_get(self, widget, drag_context, data, info, time):

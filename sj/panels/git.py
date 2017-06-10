@@ -111,9 +111,8 @@ class GitPanel(Gtk.Grid):
 
         self.attach(small_icon('go-down'), 0, 5, 1, 1)
         self.attach(code_label("git checkout -- <file>"), 1, 5, 1, 1)
-        
-        window.connect('wd_changed', self.wd_changed)
-        
+
+        window.connect('prompt', self.prompt)
 
     def make_list(self, files):
         if self.status_to_pixbuf is None:
@@ -138,10 +137,9 @@ class GitPanel(Gtk.Grid):
         self.stage_view.set_model(self.make_list(data['stage']))
         self.wd_view.set_model(self.make_list(data['wd']))
 
-    
     def _get_data_in_thread(self, pwd):
         res = check_repo(pwd)
         GLib.idle_add(self._finish_update, res)
 
-    def wd_changed(self, _, wd):
-        Thread(target=self._get_data_in_thread, args=(wd,), daemon=True).start()
+    def prompt(self, window):
+        Thread(target=self._get_data_in_thread, args=(window.cwd,), daemon=True).start()

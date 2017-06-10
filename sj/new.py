@@ -22,21 +22,30 @@ class MyDBUSService(dbus.service.Object):
         dbus.service.Object.__init__(self, conn=window.dbus_conn,
                                      object_path='/io/github/takluyver/sj')
 
-    @dbus.service.method('io.github.takluyver.sj', in_signature='ss')
-    def update(self, cwd, last_cmd):
-        self.window.emit('wd_changed', cwd)
+    @dbus.service.method('io.github.takluyver.sj', in_signature='sus')
+    def update(self, cwd, histno, last_cmd):
+        if cwd != self.window.cwd:
+            self.window.emit('wd_changed', cwd)
+        if histno != self.window.histno:
+            self.window.emit('command_run', last_cmd, histno)
+        self.window.emit('prompt')
 
 
 this_dir = dirname(abspath(__file__))
 update_file = pjoin(this_dir, 'send_update.py')
 bashrc = pjoin(this_dir, 'bashrc.sh')
-prompt_cmd = 'SJ_UPDATE_COMMAND=python3 "%s"' % update_file
+prompt_cmd = 'SJ_UPDATE_COMMAND=' + update_file
 
 class MyWindow(Gtk.Window):
     __gsignals__ = {
-        'wd_changed': (GObject.SIGNAL_RUN_FIRST, None,
-                      (str,))
+        'prompt': (GObject.SIGNAL_RUN_FIRST, None, ()),
+        'command_run': (GObject.SIGNAL_RUN_FIRST, None, (str, int)),
+        'wd_changed': (GObject.SIGNAL_RUN_FIRST, None, (str,)),
     }
+    
+    histno = 0
+    last_cmd = None
+    cwd = None
     
     def __init__(self):
         super().__init__(title="sj", default_width=1200, default_height=700)
@@ -46,7 +55,6 @@ class MyWindow(Gtk.Window):
         
         # TODO: better way to make term not tiny?
         lr_split = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL, position=800)
-        
         
         self.add(lr_split)
         self.term = Vte.Terminal()
@@ -74,6 +82,12 @@ class MyWindow(Gtk.Window):
         self.rhs.add(scroll_window)
         self.rhs.add(GitPanel(self))
 
+    def do_wd_changed(self, wd):
+        self.cwd = wd
+
+    def do_cmd_run(self, last_cmd, histno):
+        self.histno = histno
+        self.last_cmd = last_cmd
 
 def main():
     GObject.threads_init()
