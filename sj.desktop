@@ -5,4 +5,4 @@ Name=Shell Jacket
 Comment=A heads-up display for your shell
 TryExec=sj
 Exec=sj
-Icon=terminal
+Icon=utilities-terminal
