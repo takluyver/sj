@@ -90,6 +90,7 @@ class GitPanel(Gtk.VBox):
         super().__init__(orientation=Gtk.Orientation.VERTICAL,
             spacing=5, margin=3,
         )
+        self.pack_start(Gtk.HSeparator(), False, False, 0)
         hbox = Gtk.HBox()
         self.repo_label = Gtk.Label(label='Git', halign=Gtk.Align.START)
         hbox.add(self.repo_label)
