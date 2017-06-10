@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Shell Jacket
+Comment=A heads-up display for your shell
+TryExec=sj
+Exec=sj
+Icon=terminal
