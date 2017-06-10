@@ -88,7 +88,7 @@ class GitPanel(Gtk.Grid):
 
     def __init__(self, window):
         super().__init__(orientation=Gtk.Orientation.VERTICAL,
-            row_spacing=5, column_spacing=5,
+            row_spacing=5, column_spacing=5, margin_top=5,
         )
         self.repo_label = Gtk.Label(label='Git')
         self.attach(self.repo_label, 0, 0, 2, 1)
