@@ -12,6 +12,7 @@ import dbus
 import dbus.service
 from dbus.mainloop.glib import DBusGMainLoop
 
+from .utils import compress_user
 from .panels.pwd import PathLabel
 from .panels.files import FilesTreeView
 from .panels.git import GitPanel
@@ -84,6 +85,7 @@ class MyWindow(Gtk.Window):
 
     def do_wd_changed(self, wd):
         self.cwd = wd
+        self.set_title(compress_user(wd))
 
     def do_cmd_run(self, last_cmd, histno):
         self.histno = histno
