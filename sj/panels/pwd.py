@@ -1,11 +1,5 @@
-import os.path
 from gi.repository import Gtk
-
-_home = os.path.expanduser('~')
-def compress_user(path):
-    if path.startswith(_home):
-        return '~' + path[len(_home):]
-    return path
+from sj.utils import compress_user
 
 class PathLabel(Gtk.Label):
     def __init__(self, window):

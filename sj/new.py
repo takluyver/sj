@@ -14,6 +14,7 @@ from dbus.mainloop.glib import DBusGMainLoop
 
 from .panels.pwd import PathLabel
 from .panels.files import FilesTreeView
+from .panels.git import GitPanel
 
 class MyDBUSService(dbus.service.Object):
     def __init__(self, window):
@@ -38,13 +39,15 @@ class MyWindow(Gtk.Window):
     }
     
     def __init__(self):
-        super().__init__(title="sj")
+        super().__init__(title="sj", default_width=1200, default_height=700)
         self.panels = []
         self.dbus_conn = dbus.SessionBus()
         self.update_service = MyDBUSService(self)
-        lr_split = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
-        # TODO: better way to make term not tiny
-        lr_split.set_property('position', 600)
+        
+        # TODO: better way to make term not tiny?
+        lr_split = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL, position=800)
+        
+        
         self.add(lr_split)
         self.term = Vte.Terminal()
         self.term.connect("child-exited", Gtk.main_quit)
@@ -69,12 +72,15 @@ class MyWindow(Gtk.Window):
         scroll_window.add(self.files_tv)
         scroll_window.set_property('propagate-natural-width', True)
         self.rhs.add(scroll_window)
+        self.rhs.add(GitPanel(self))
 
 
 def main():
+    GObject.threads_init()
     DBusGMainLoop(set_as_default=True)
     win = MyWindow()
     win.connect("delete-event", Gtk.main_quit)
     win.show_all()
+    win.term.grab_focus()
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     Gtk.main()
