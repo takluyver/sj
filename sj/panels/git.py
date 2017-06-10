@@ -67,15 +67,15 @@ def check_repo(pwd):
 
     return data
 
-def code_label(txt):
-    l = Gtk.Label(halign=Gtk.Align.START)
+def icon_and_label(icon_name, txt):
+    box = Gtk.HBox()
+    i = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.SMALL_TOOLBAR)
+    i.set_property('margin-left', 5)
+    box.pack_start(i, False, False, 0)
+    l = Gtk.Label(halign=Gtk.Align.START, margin_left=8)
     l.set_markup('<tt>%s</tt>' % GLib.markup_escape_text(txt))
-    return l
-
-def small_icon(name):
-    i = Gtk.Image.new_from_icon_name(name, Gtk.IconSize.SMALL_TOOLBAR)
-    i.set_halign(Gtk.Align.END)
-    return i
+    box.pack_start(l, True, True, 0)
+    return box
 
 def status_icon_view():
     return Gtk.IconView(pixbuf_column=0, text_column=1, item_padding=0, 
@@ -83,34 +83,37 @@ def status_icon_view():
         selection_mode=Gtk.SelectionMode.NONE, can_focus=False,
         item_orientation=Gtk.Orientation.HORIZONTAL)
 
-class GitPanel(Gtk.Grid):
+class GitPanel(Gtk.VBox):
     status_to_pixbuf = None
 
     def __init__(self, window):
         super().__init__(orientation=Gtk.Orientation.VERTICAL,
-            row_spacing=5, column_spacing=5, margin_top=5,
+            spacing=5, margin=3,
         )
-        self.repo_label = Gtk.Label(label='Git')
-        self.attach(self.repo_label, 0, 0, 2, 1)
+        hbox = Gtk.HBox()
+        self.repo_label = Gtk.Label(label='Git', halign=Gtk.Align.START)
+        hbox.add(self.repo_label)
+        self.branch_label = Gtk.Label(halign=Gtk.Align.END)
+        hbox.add(self.branch_label)
+        self.pack_start(hbox, False, False, 0)
 
         self.stage_view = status_icon_view()
         stage_scroll = Gtk.ScrolledWindow(propagate_natural_width=True)
         stage_scroll.add(self.stage_view)
-        self.attach(stage_scroll, 0, 1, 2, 1)
+        self.add(stage_scroll)
 
-        self.attach(small_icon('go-up'), 0, 2, 1, 1)
-        self.attach(code_label("git add <file>"), 1, 2, 1, 1)
-
-        self.attach(small_icon('go-down'), 0, 3, 1, 1)
-        self.attach(code_label("git reset HEAD <file>"), 1, 3, 1, 1)
+        self.pack_start(icon_and_label('go-up', "git add <file>"),
+                        False, False, 0)
+        self.pack_start(icon_and_label('go-down', "git reset HEAD <file>"),
+                        False, False, 0)
 
         self.wd_view = status_icon_view()
         wd_scroll = Gtk.ScrolledWindow(propagate_natural_width=True)
         wd_scroll.add(self.wd_view)
-        self.attach(wd_scroll, 0, 4, 2, 1)
+        self.add(wd_scroll)
 
-        self.attach(small_icon('go-down'), 0, 5, 1, 1)
-        self.attach(code_label("git checkout -- <file>"), 1, 5, 1, 1)
+        self.pack_start(icon_and_label('go-down', "git checkout -- <file>"),
+                        False, False, 0)
 
         window.connect('prompt', self.prompt)
 
@@ -134,6 +137,10 @@ class GitPanel(Gtk.Grid):
         
         self.show()
         self.repo_label.set_text('Git: %s' % compress_user(data['reporoot']))
+        if data['branch']:
+            self.branch_label.set_text(data['branch'])
+        else:
+            self.branch_label.set_text('[no branch]')
         self.stage_view.set_model(self.make_list(data['stage']))
         self.wd_view.set_model(self.make_list(data['wd']))
 
