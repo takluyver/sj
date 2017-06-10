@@ -20,7 +20,7 @@ head_branch_re = re.compile(r'ref: refs/heads/(.*)')
 def check_repo(pwd):
     try:
         reporoot = subprocess.check_output(['git', 'rev-parse', '--show-toplevel'],
-                                           universal_newlines=True,
+                                           universal_newlines=True, stderr=subprocess.DEVNULL,
                                            cwd=pwd).strip()
     except subprocess.CalledProcessError as e:
         # Not in a git repo
