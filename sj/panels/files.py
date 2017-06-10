@@ -13,12 +13,15 @@ def fmt_size(n):
     return 'huge'  # Technically correct
 
 
-def make_list_store(path):
+def get_files_list(path):
+    # TODO: configurable sorting, visibility of .hidden files
+    return sorted(os.scandir(path),
+            key=lambda f: (not f.is_dir(), f.name.lower()))
+
+def make_files_model(files):
     # Cols: name, icon, size, path
     s = Gtk.ListStore(str, Gio.Icon, str, str)
-    # TODO: configurable sorting, visibility of .hidden files
-    for file in sorted(os.scandir(path),
-            key=lambda f: (not f.is_dir(), f.name.lower())):
+    for file in files:
         if file.name.startswith('.'):
             continue
         if file.is_dir():
@@ -71,6 +74,8 @@ class MultiDragDropTreeView(Gtk.TreeView):
 # ------
 
 class FilesTreeView(MultiDragDropTreeView):
+    current_file_names = ()
+
     def __init__(self, window):
         super().__init__()
         namecol = Gtk.TreeViewColumn("Name")
@@ -93,8 +98,15 @@ class FilesTreeView(MultiDragDropTreeView):
         self.connect("drag-data-get", self.on_drag_data_get)
 
     def prompt(self, window):
-        new_files_store = make_list_store(window.cwd)
-        self.set_model(new_files_store)
+        new_files = get_files_list(window.cwd)
+        new_names = [f.name for f in new_files]
+        
+        print(len(new_names), len(self.current_file_names))
+        
+        if new_names != self.current_file_names:
+            # Only replace the model if files have changed.
+            self.set_model(make_files_model(new_files))
+            self.current_file_names = new_names
 
     def on_drag_data_get(self, widget, drag_context, data, info, time):
         selected_rows = self.get_selection().get_selected_rows()[1]
