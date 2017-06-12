@@ -67,13 +67,15 @@ def check_repo(pwd):
 
     return data
 
+_escape = GLib.markup_escape_text
+
 def icon_and_label(icon_name, txt):
     box = Gtk.HBox()
     i = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.SMALL_TOOLBAR)
     i.set_property('margin-left', 5)
     box.pack_start(i, False, False, 0)
     l = Gtk.Label(halign=Gtk.Align.START, margin_left=8)
-    l.set_markup('<tt>%s</tt>' % GLib.markup_escape_text(txt))
+    l.set_markup('<tt>%s</tt>' % _escape(txt))
     box.pack_start(l, True, True, 0)
     return box
 
@@ -98,23 +100,38 @@ class GitPanel(Gtk.VBox):
         hbox.add(self.branch_label)
         self.pack_start(hbox, False, False, 0)
 
+        self.changes_part = Gtk.VBox()
+        self.add(self.changes_part)
+        stage_box = Gtk.HBox()
+        self.changes_part.add(stage_box)
         self.stage_view = status_icon_view()
         stage_scroll = Gtk.ScrolledWindow(propagate_natural_width=True)
         stage_scroll.add(self.stage_view)
-        self.add(stage_scroll)
+        stage_box.add(stage_scroll)
+        stage_box.pack_start(Gtk.Label(label='Stage', angle=90), False, False, 0)
 
-        self.pack_start(icon_and_label('go-up', "git add <file>"),
+        self.changes_part.pack_start(icon_and_label('go-down', "git reset HEAD <file>"),
                         False, False, 0)
-        self.pack_start(icon_and_label('go-down', "git reset HEAD <file>"),
+        self.changes_part.pack_start(icon_and_label('go-up', "git add <file>"),
                         False, False, 0)
 
+        wd_box = Gtk.HBox()
+        self.changes_part.add(wd_box)
         self.wd_view = status_icon_view()
         wd_scroll = Gtk.ScrolledWindow(propagate_natural_width=True)
         wd_scroll.add(self.wd_view)
-        self.add(wd_scroll)
+        wd_box.add(wd_scroll)
+        wd_box.pack_start(Gtk.Label(label='CWD', angle=90), False, False, 0)
 
-        self.pack_start(icon_and_label('go-down', "git checkout -- <file>"),
+        self.changes_part.pack_start(icon_and_label('go-down', "git checkout -- <file>"),
                         False, False, 0)
+
+        self.commit_part = Gtk.VBox()
+        self.pack_start(self.commit_part, False, False, 0)
+        self.commit_info = Gtk.Label()
+        self.commit_part.pack_start(self.commit_info, False, False, 0)
+        self.commit_msg = Gtk.Label()
+        self.commit_part.pack_start(self.commit_msg, False, False, 0)
 
         window.connect('prompt', self.prompt)
 
@@ -142,8 +159,20 @@ class GitPanel(Gtk.VBox):
             self.branch_label.set_text(data['branch'])
         else:
             self.branch_label.set_text('[no branch]')
-        self.stage_view.set_model(self.make_list(data['stage']))
-        self.wd_view.set_model(self.make_list(data['wd']))
+        if data['stage'] or data['wd']:
+            self.stage_view.set_model(self.make_list(data['stage']))
+            self.wd_view.set_model(self.make_list(data['wd']))
+            self.changes_part.show()
+            self.commit_part.hide()
+        else:
+            self.changes_part.hide()
+            self.commit_part.show()
+            commit = data['commit']
+            self.commit_info.set_markup('Last commit: <b>{}</b> · {}'.format(
+                _escape(commit['shorthash']), _escape(commit['reltime'])
+            ))
+            self.commit_msg.set_text(commit['message'])
+
 
     def _get_data_in_thread(self, pwd):
         res = check_repo(pwd)
