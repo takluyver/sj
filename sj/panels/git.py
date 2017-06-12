@@ -164,9 +164,11 @@ class GitPanel(Gtk.VBox):
             self.wd_view.set_model(self.make_list(data['wd']))
             self.changes_part.show()
             self.commit_part.hide()
+            self.set_vexpand(True)
         else:
             self.changes_part.hide()
             self.commit_part.show()
+            self.set_vexpand(False)
             commit = data['commit']
             self.commit_info.set_markup('Last commit: <b>{}</b> · {}'.format(
                 _escape(commit['shorthash']), _escape(commit['reltime'])

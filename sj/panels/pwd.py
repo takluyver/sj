@@ -4,7 +4,7 @@ from sj.utils import compress_user
 class PathLabel(Gtk.Label):
     larger = False
     def __init__(self, window):
-        super().__init__()
+        super().__init__(margin_bottom=5, margin_top=5)
         self.set_markup("Configure your shell to run <b>$SJ_UPDATE_COMMAND</b> "
                         "at each prompt.")
         window.connect('wd_changed', self.wd_changed)
