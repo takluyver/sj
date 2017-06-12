@@ -101,8 +101,6 @@ class FilesTreeView(MultiDragDropTreeView):
         new_files = get_files_list(window.cwd)
         new_names = [f.name for f in new_files]
         
-        print(len(new_names), len(self.current_file_names))
-        
         if new_names != self.current_file_names:
             # Only replace the model if files have changed.
             self.set_model(make_files_model(new_files))
