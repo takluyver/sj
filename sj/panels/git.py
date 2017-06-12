@@ -2,7 +2,7 @@ import os.path
 import re
 import subprocess
 from threading import Thread
-from gi.repository import Gtk, GLib, GdkPixbuf
+from gi.repository import Gtk, GLib, GdkPixbuf, Pango
 from sj.utils import compress_user
 
 
@@ -130,7 +130,7 @@ class GitPanel(Gtk.VBox):
         self.pack_start(self.commit_part, False, False, 0)
         self.commit_info = Gtk.Label()
         self.commit_part.pack_start(self.commit_info, False, False, 0)
-        self.commit_msg = Gtk.Label()
+        self.commit_msg = Gtk.Label(ellipsize=Pango.EllipsizeMode.END)
         self.commit_part.pack_start(self.commit_msg, False, False, 0)
 
         window.connect('prompt', self.prompt)
