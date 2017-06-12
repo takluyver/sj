@@ -20,8 +20,8 @@ from .panels.git import GitPanel
 class MyDBUSService(dbus.service.Object):
     def __init__(self, window):
         self.window = window
-        dbus.service.Object.__init__(self, conn=window.dbus_conn,
-                                     object_path='/io/github/takluyver/sj')
+        super().__init__(conn=window.dbus_conn,
+                         object_path='/io/github/takluyver/sj')
 
     @dbus.service.method('io.github.takluyver.sj', in_signature='sus')
     def update(self, cwd, histno, last_cmd):
