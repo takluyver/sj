@@ -79,7 +79,7 @@ class MyWindow(Gtk.Window):
         self.files_tv = FilesTreeView(self)
         scroll_window = Gtk.ScrolledWindow(expand=True)
         scroll_window.add(self.files_tv)
-        scroll_window.set_property('propagate-natural-width', True)
+        #scroll_window.set_property('propagate-natural-width', True)
         self.rhs.add(scroll_window)
         self.rhs.add(GitPanel(self))
 
