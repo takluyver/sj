@@ -23,19 +23,22 @@ class MyDBUSService(dbus.service.Object):
         super().__init__(conn=window.dbus_conn,
                          object_path='/io/github/takluyver/sj')
 
-    @dbus.service.method('io.github.takluyver.sj', in_signature='sus')
-    def update(self, cwd, histno, last_cmd):
-        if cwd != self.window.cwd:
-            self.window.emit('wd_changed', cwd)
-        if histno != self.window.histno:
-            self.window.emit('command_run', last_cmd, histno)
+    @dbus.service.method('io.github.takluyver.sj', in_signature='')
+    def get_update_args(self):
+        return ' '.join(['{} "{}"'.format(k, v)
+                 for (k, v) in sorted(self.window.shell_request.items())])
+
+    @dbus.service.method('io.github.takluyver.sj', in_signature='a{ss}')
+    def update(self, values):
+        if values['cwd'] != self.window.cwd:
+            self.window.emit('wd_changed', values['cwd'])
         self.window.emit('prompt')
 
 
 this_dir = dirname(abspath(__file__))
 update_file = pjoin(this_dir, 'send_update.py')
 bashrc = pjoin(this_dir, 'bashrc.sh')
-prompt_cmd = 'SJ_UPDATE_COMMAND=' + update_file
+prompt_cmd = 'SJ_UPDATE_COMMAND=$(eval $({} --discover))'.format(update_file)
 
 class MyWindow(Gtk.ApplicationWindow):
     __gsignals__ = {
@@ -52,6 +55,7 @@ class MyWindow(Gtk.ApplicationWindow):
         super().__init__(application=app, title="sj", default_width=1200, default_height=700)
         self.app = app
         self.panels = []
+        self.shell_request = {'cwd': '$PWD'}
         self.dbus_conn = dbus.SessionBus()
         self.update_service = MyDBUSService(self)
         
