@@ -97,7 +97,7 @@ class FilesTreeView(MultiDragDropTreeView):
             [('text/uri-list', 0, 1)],  Gdk.DragAction.COPY)
         self.connect("drag-data-get", self.on_drag_data_get)
 
-    def prompt(self, window):
+    def prompt(self, window, values):
         new_files = get_files_list(window.cwd)
         new_names = [f.name for f in new_files]
         

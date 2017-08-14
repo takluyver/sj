@@ -180,5 +180,5 @@ class GitPanel(Gtk.VBox):
         res = check_repo(pwd)
         GLib.idle_add(self._finish_update, res)
 
-    def prompt(self, window):
+    def prompt(self, window, values):
         Thread(target=self._get_data_in_thread, args=(window.cwd,), daemon=True).start()

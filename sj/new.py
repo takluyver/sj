@@ -16,6 +16,7 @@ from .utils import compress_user
 from .panels.pwd import PathLabel
 from .panels.files import FilesTreeView
 from .panels.git import GitPanel
+from .panels.dirstack import DirsPanel
 
 class MyDBUSService(dbus.service.Object):
     def __init__(self, window):
@@ -32,7 +33,7 @@ class MyDBUSService(dbus.service.Object):
     def update(self, values):
         if values['cwd'] != self.window.cwd:
             self.window.emit('wd_changed', values['cwd'])
-        self.window.emit('prompt')
+        self.window.emit('prompt', values)
 
 
 this_dir = dirname(abspath(__file__))
@@ -42,7 +43,7 @@ prompt_cmd = 'SJ_UPDATE_COMMAND=$(eval $({} --discover))'.format(update_file)
 
 class MyWindow(Gtk.ApplicationWindow):
     __gsignals__ = {
-        'prompt': (GObject.SIGNAL_RUN_FIRST, None, ()),
+        'prompt': (GObject.SIGNAL_RUN_FIRST, None, (object,)),
         'command_run': (GObject.SIGNAL_RUN_FIRST, None, (str, int)),
         'wd_changed': (GObject.SIGNAL_RUN_FIRST, None, (str,)),
     }
@@ -55,7 +56,6 @@ class MyWindow(Gtk.ApplicationWindow):
         super().__init__(application=app, title="sj", default_width=1200, default_height=700)
         self.app = app
         self.panels = []
-        self.shell_request = {'cwd': '$PWD'}
         self.dbus_conn = dbus.SessionBus()
         self.update_service = MyDBUSService(self)
         
@@ -88,7 +88,22 @@ class MyWindow(Gtk.ApplicationWindow):
         self.rhs.add(scroll_window)
         self.rhs.add(GitPanel(self))
 
+        self.new_panel(DirsPanel)
+
         self.setup_actions()
+
+    def new_panel(self, constructor):
+        panel = constructor(self)
+        self.rhs.add(panel)
+        self.panels.append(panel)
+
+    @property
+    def shell_request(self):
+        d = {'cwd': '$PWD'}
+        for p in self.panels:
+            if hasattr(p, 'shell_request'):
+                d.update(p.shell_request)
+        return d
 
     def setup_actions(self):
         copy = Gio.SimpleAction.new('term_copy', None)
