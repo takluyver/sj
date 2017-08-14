@@ -13,10 +13,7 @@ import dbus.service
 from dbus.mainloop.glib import DBusGMainLoop
 
 from .utils import compress_user
-from .panels.pwd import PathLabel
-from .panels.files import FilesTreeView
-from .panels.git import GitPanel
-from .panels.dirstack import DirsPanel
+from .panels import pwd, git, files, dirstack
 
 class MyDBUSService(dbus.service.Object):
     def __init__(self, window):
@@ -79,16 +76,10 @@ class MyWindow(Gtk.ApplicationWindow):
             )
         lr_split.pack1(self.term, True, False)
         self.rhs = Gtk.Grid(orientation=Gtk.Orientation.VERTICAL)
-        self.rhs.add(PathLabel(self))
         lr_split.pack2(self.rhs, False, True)
-        self.files_tv = FilesTreeView(self)
-        scroll_window = Gtk.ScrolledWindow(expand=True)
-        scroll_window.add(self.files_tv)
-        #scroll_window.set_property('propagate-natural-width', True)
-        self.rhs.add(scroll_window)
-        self.rhs.add(GitPanel(self))
 
-        self.new_panel(DirsPanel)
+        for panelmod in [pwd, files, git, dirstack]:
+            self.new_panel(panelmod.constructor)
 
         self.setup_actions()
 

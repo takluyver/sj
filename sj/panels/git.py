@@ -182,3 +182,5 @@ class GitPanel(Gtk.VBox):
 
     def prompt(self, window, values):
         Thread(target=self._get_data_in_thread, args=(window.cwd,), daemon=True).start()
+
+constructor = GitPanel

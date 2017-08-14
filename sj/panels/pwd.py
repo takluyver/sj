@@ -12,3 +12,5 @@ class PathLabel(Gtk.Label):
     def wd_changed(self, _, wd):
         path = compress_user(wd)
         self.set_markup('<big>%s</big>' % GLib.markup_escape_text(path))
+
+constructor = PathLabel

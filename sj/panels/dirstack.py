@@ -37,3 +37,5 @@ class DirsPanel(Gtk.VBox):
         self.show()
         self.liststore = make_list_store(dirstack)
         self.list.set_model(self.liststore)
+
+constructor = DirsPanel

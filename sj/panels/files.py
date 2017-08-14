@@ -76,7 +76,7 @@ class MultiDragDropTreeView(Gtk.TreeView):
 class FilesTreeView(MultiDragDropTreeView):
     current_file_names = ()
 
-    def __init__(self, window):
+    def __init__(self):
         super().__init__()
         namecol = Gtk.TreeViewColumn("Name")
         namecol.set_property('expand', True)
@@ -90,8 +90,6 @@ class FilesTreeView(MultiDragDropTreeView):
         namecol.pack_start(name_renderer,  True)
         namecol.add_attribute(name_renderer, "text", 0)
         self.append_column(Gtk.TreeViewColumn("Size", Gtk.CellRendererText(), text=2))
-
-        window.connect('prompt', self.prompt)
 
         self.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK,
             [('text/uri-list', 0, 1)],  Gdk.DragAction.COPY)
@@ -117,3 +115,12 @@ class FilesTreeView(MultiDragDropTreeView):
             uris.append('file://' + file_path)
 
         data.set_uris(uris)
+
+class FilesPanel(Gtk.ScrolledWindow):
+    def __init__(self, window):
+        super().__init__(expand=True)
+        self.files_tv = FilesTreeView()
+        self.add(self.files_tv)
+        window.connect('prompt', self.files_tv.prompt)
+
+constructor = FilesPanel
