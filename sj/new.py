@@ -32,6 +32,10 @@ class MyDBUSService(dbus.service.Object):
             self.window.emit('wd_changed', values['cwd'])
         self.window.emit('prompt', values)
 
+    @dbus.service.method('io.github.takluyver.sj', in_signature='')
+    def get_version(self):
+        from . import __version__
+        return __version__
 
 this_dir = dirname(abspath(__file__))
 update_file = pjoin(this_dir, 'send_update.py')
