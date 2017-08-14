@@ -24,5 +24,5 @@ def main():
                 status = 'visible' if visible else 'hiding'
             else:
                 status = 'disabled'
-            dashes = '-' * (max_name_length + 2 - len(name))
+            dashes = '-' * (max_name_length + 1 - len(name))
             print(' ', name, dashes, status)
