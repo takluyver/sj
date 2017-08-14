@@ -117,6 +117,8 @@ class FilesTreeView(MultiDragDropTreeView):
         data.set_uris(uris)
 
 class FilesPanel(Gtk.ScrolledWindow):
+    panel_name = 'files'
+
     def __init__(self, window):
         super().__init__(expand=True)
         self.files_tv = FilesTreeView()

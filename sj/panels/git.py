@@ -86,6 +86,7 @@ def status_icon_view():
         item_orientation=Gtk.Orientation.HORIZONTAL)
 
 class GitPanel(Gtk.VBox):
+    panel_name = 'git'
     status_to_pixbuf = None
 
     def __init__(self, window):

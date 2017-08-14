@@ -8,6 +8,7 @@ def make_list_store(dirs):
     return liststore
 
 class DirsPanel(Gtk.VBox):
+    panel_name = 'dirstack'
     shell_request = {'dirstack': '$(dirs -p)'}
     liststore = None
 

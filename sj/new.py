@@ -37,6 +37,11 @@ class MyDBUSService(dbus.service.Object):
         from . import __version__
         return __version__
 
+    @dbus.service.method('io.github.takluyver.sj', in_signature='', out_signature='a(sbb)')
+    def get_panels_status(self):
+        return [(p.panel_name, True, p.get_visible()) for p in self.window.panels]
+
+
 this_dir = dirname(abspath(__file__))
 update_file = pjoin(this_dir, 'send_update.py')
 bashrc = pjoin(this_dir, 'bashrc.sh')

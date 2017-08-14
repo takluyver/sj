@@ -2,6 +2,7 @@ from gi.repository import Gtk, GLib
 from sj.utils import compress_user
 
 class PathLabel(Gtk.Label):
+    panel_name = 'pwd'
     larger = False
     def __init__(self, window):
         super().__init__(margin_bottom=5, margin_top=5)
