@@ -27,9 +27,7 @@ class DirsPanel(Gtk.VBox):
         self.list.append_column(namecol)
         self.add(self.list)
 
-        window.connect('prompt', self.prompt)
-
-    def prompt(self, window, values):
+    def on_prompt(self, window,  values):
         dirstack = values['dirstack'].split('\n')[1:]
         if not dirstack:
             self.hide()

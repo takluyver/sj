@@ -18,11 +18,23 @@ def main():
     elif subcmd == 'panels':
         print('Loaded panels:')
         info = proxy_call('get_panels_status')
-        max_name_length = max(len(r[0]) for r in info)
-        for name, enabled, visible in info:
-            if enabled:
-                status = 'visible' if visible else 'hiding'
+        max_name_length = max(len(p['name']) for p in info)
+        for panel in info:
+            if panel['enabled']:
+                status = 'visible' if panel['visible'] else 'hiding'
             else:
                 status = 'disabled'
-            dashes = '-' * (max_name_length + 1 - len(name))
-            print(' ', name, dashes, status)
+            dashes = '-' * (max_name_length + 1 - len(panel['name']))
+            print(' ', panel['name'], dashes, status)
+
+    elif subcmd.startswith('.'):
+        # Panel command, e.g. 'sj .git off'
+        panel_name = subcmd[1:]
+        panel_cmd = sys.argv[2]
+        if panel_cmd == 'on':
+            proxy_call('enable_panel', panel_name)
+        elif panel_cmd == 'off':
+            proxy_call('disable_panel', panel_name)
+
+    else:
+        sys.exit('Unknown command: sj %s' % subcmd)

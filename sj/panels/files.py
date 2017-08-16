@@ -95,8 +95,8 @@ class FilesTreeView(MultiDragDropTreeView):
             [('text/uri-list', 0, 1)],  Gdk.DragAction.COPY)
         self.connect("drag-data-get", self.on_drag_data_get)
 
-    def prompt(self, window, values):
-        new_files = get_files_list(window.cwd)
+    def prompt(self, values):
+        new_files = get_files_list(values['cwd'])
         new_names = [f.name for f in new_files]
         
         if new_names != self.current_file_names:
@@ -123,6 +123,9 @@ class FilesPanel(Gtk.ScrolledWindow):
         super().__init__(expand=True)
         self.files_tv = FilesTreeView()
         self.add(self.files_tv)
-        window.connect('prompt', self.files_tv.prompt)
+
+    def on_prompt(self, window, values):
+        self.files_tv.prompt(values)
+        self.show()
 
 constructor = FilesPanel

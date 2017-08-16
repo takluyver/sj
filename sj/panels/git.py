@@ -134,8 +134,6 @@ class GitPanel(Gtk.VBox):
         self.commit_msg = Gtk.Label(ellipsize=Pango.EllipsizeMode.END)
         self.commit_part.pack_start(self.commit_msg, False, False, 0)
 
-        window.connect('prompt', self.prompt)
-
     def make_list(self, files):
         if self.status_to_pixbuf is None:
             theme = Gtk.IconTheme.get_default()
@@ -181,7 +179,7 @@ class GitPanel(Gtk.VBox):
         res = check_repo(pwd)
         GLib.idle_add(self._finish_update, res)
 
-    def prompt(self, window, values):
-        Thread(target=self._get_data_in_thread, args=(window.cwd,), daemon=True).start()
+    def on_prompt(self, window, values):
+        Thread(target=self._get_data_in_thread, args=(values['cwd'],), daemon=True).start()
 
 constructor = GitPanel

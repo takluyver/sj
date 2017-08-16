@@ -28,8 +28,6 @@ class MyDBUSService(dbus.service.Object):
 
     @dbus.service.method('io.github.takluyver.sj', in_signature='a{ss}')
     def update(self, values):
-        if values['cwd'] != self.window.cwd:
-            self.window.emit('wd_changed', values['cwd'])
         self.window.emit('prompt', values)
 
     @dbus.service.method('io.github.takluyver.sj', in_signature='')
@@ -37,10 +35,28 @@ class MyDBUSService(dbus.service.Object):
         from . import __version__
         return __version__
 
-    @dbus.service.method('io.github.takluyver.sj', in_signature='', out_signature='a(sbb)')
+    @dbus.service.method('io.github.takluyver.sj', in_signature='', out_signature='aa{sv}')
     def get_panels_status(self):
-        return [(p.panel_name, True, p.get_visible()) for p in self.window.panels]
+        return [{'name': p.panel_name,
+                 'enabled': p.panel_name not in self.window.disabled_panel_names,
+                 'visible': p.get_visible()}
+                for p in self.window.panels]
 
+    @dbus.service.method('io.github.takluyver.sj', in_signature='s')
+    def disable_panel(self, name):
+        panel = self.window.panel_by_name(name)
+        panel.hide()
+        if name not in self.window.disabled_panel_names:
+            self.window.disabled_panel_names.add(name)
+            self.window.disconnect_by_func(panel.on_prompt)
+
+    @dbus.service.method('io.github.takluyver.sj', in_signature='s')
+    def enable_panel(self, name):
+        panel = self.window.panel_by_name(name)
+        if name in self.window.disabled_panel_names:
+            self.window.disabled_panel_names.discard(name)
+            self.window.connect('prompt', panel.on_prompt)
+        # The panel should show itself if relevant at the next prompt
 
 this_dir = dirname(abspath(__file__))
 update_file = pjoin(this_dir, 'send_update.py')
@@ -50,8 +66,6 @@ prompt_cmd = 'SJ_UPDATE_COMMAND=$(eval $({} --discover))'.format(update_file)
 class MyWindow(Gtk.ApplicationWindow):
     __gsignals__ = {
         'prompt': (GObject.SIGNAL_RUN_FIRST, None, (object,)),
-        'command_run': (GObject.SIGNAL_RUN_FIRST, None, (str, int)),
-        'wd_changed': (GObject.SIGNAL_RUN_FIRST, None, (str,)),
     }
     
     histno = 0
@@ -62,6 +76,7 @@ class MyWindow(Gtk.ApplicationWindow):
         super().__init__(application=app, title="sj", default_width=1200, default_height=700)
         self.app = app
         self.panels = []
+        self.disabled_panel_names = set()
         self.dbus_conn = dbus.SessionBus()
         self.update_service = MyDBUSService(self)
         
@@ -96,6 +111,19 @@ class MyWindow(Gtk.ApplicationWindow):
         panel = constructor(self)
         self.rhs.add(panel)
         self.panels.append(panel)
+        self.connect('prompt', panel.on_prompt)
+
+    def panel_by_name(self, name):
+        for panel in self.panels:
+            if panel.panel_name == name:
+                return panel
+        raise KeyError(name)
+
+    @property
+    def enabled_panels(self):
+        for panel in self.panels:
+            if panel.panel_name not in self.disabled_panel_names:
+                yield panel
 
     @property
     def shell_request(self):
