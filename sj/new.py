@@ -134,15 +134,15 @@ class MyWindow(Gtk.ApplicationWindow):
         return d
 
     def setup_actions(self):
-        copy = Gio.SimpleAction.new('term_copy', None)
+        copy = Gio.SimpleAction.new('term-copy', None)
         copy.connect('activate', self.term_copy)
         self.add_action(copy)
-        self.app.add_accelerator("<Control><Shift>c", "win.term_copy")
+        self.app.add_accelerator("<Control><Shift>c", "win.term-copy")
 
-        paste = Gio.SimpleAction.new('term_paste', None)
+        paste = Gio.SimpleAction.new('term-paste', None)
         paste.connect('activate', self.term_paste)
         self.add_action(paste)
-        self.app.add_accelerator("<Control><Shift>v", "win.term_paste")
+        self.app.add_accelerator("<Control><Shift>v", "win.term-paste")
 
     def term_copy(self, *args):
         self.term.copy_clipboard()
