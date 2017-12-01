@@ -73,7 +73,9 @@ class MyWindow(Gtk.ApplicationWindow):
     cwd = None
     
     def __init__(self, app):
-        super().__init__(application=app, title="sj", default_width=1200, default_height=700)
+        super().__init__(application=app, title="sj",
+                         default_width=1200, default_height=700)
+        self.set_default_icon_name('terminal')
         self.app = app
         self.panels = []
         self.disabled_panel_names = set()
