@@ -75,7 +75,7 @@ class MyWindow(Gtk.ApplicationWindow):
     def __init__(self, app):
         super().__init__(application=app, title="sj",
                          default_width=1200, default_height=700)
-        self.set_default_icon_name('terminal')
+        self.set_default_icon_name('utilities-terminal')
         self.app = app
         self.panels = []
         self.disabled_panel_names = set()
@@ -163,7 +163,7 @@ class MyWindow(Gtk.ApplicationWindow):
 class SJApplication(Gtk.Application):
     def do_activate(self):
         win = MyWindow(self)
-        win.connect("delete-event", self.quit_on_signal)
+        self.add_window(win)
         win.show_all()
         win.term.grab_focus()
 
@@ -174,5 +174,5 @@ def main():
     GObject.threads_init()
     DBusGMainLoop(set_as_default=True)
     signal.signal(signal.SIGINT, signal.SIG_DFL)
-    app = SJApplication()
-    app.run([])
+    app = SJApplication(application_id='io.github.takluyver.sj')
+    app.run()
