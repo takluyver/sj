@@ -10,6 +10,13 @@ def proxy_call(method_name, *args):
     return method(*args)
 
 def main():
+    if len(sys.argv) < 2:
+        print("Subcommands: version, panels")
+        print("Panel commands (for each panel name): \n"
+              "  sj .files on\n"
+              "  sj .files off\n")
+        sys.exit(1)
+
     subcmd = sys.argv[1]
     if subcmd == 'version':
         print('sj version {} connected at D-Bus name {}'.format(
@@ -30,6 +37,8 @@ def main():
     elif subcmd.startswith('.'):
         # Panel command, e.g. 'sj .git off'
         panel_name = subcmd[1:]
+        if len(sys.argv) < 3:
+            sys.exit("Panel commands: on, off")
         panel_cmd = sys.argv[2]
         if panel_cmd == 'on':
             proxy_call('enable_panel', panel_name)
