@@ -1,0 +1,15 @@
+[build-system]
+requires = ["flit_core >=2,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.metadata]
+module = "sj"
+author = "Thomas Kluyver"
+author-email = "thomas@kluyver.me.uk"
+home-page = "https://github.com/takluyver/sj"
+classifiers = ["License :: OSI Approved :: MIT License"]
+
+
+[tool.flit.scripts]
+sj-new = "sj.new:main"
+sj = "sj.control:main"
