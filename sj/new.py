@@ -6,7 +6,7 @@ import signal
 gi.require_version('Gtk', '3.0')
 gi.require_version('Vte', '2.91')
 
-from gi.repository import Gtk, GObject, GLib, Vte, Gio
+from gi.repository import Gtk, GObject, GLib, Vte, Gio, Gdk
 
 import dbus
 import dbus.service
@@ -86,8 +86,13 @@ class MyWindow(Gtk.ApplicationWindow):
         lr_split = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL, position=800)
         
         self.add(lr_split)
-        self.term = Vte.Terminal()
+        self.term = Vte.Terminal(allow_hyperlink=True)
         self.term.connect("child-exited", self.app.quit_on_signal)
+        self.term.connect("button-press-event", self.on_button_press)
+        PCRE2_MULTILINE = 0x00000400
+        self.regex_tag_http = self.term.match_add_regex(
+            Vte.Regex.new_for_match("https?://[^\s]+", -1, PCRE2_MULTILINE), 0
+        )
         self.term.spawn_sync(Vte.PtyFlags.DEFAULT, 
                 None,     # CWD
                 # TODO: use your shell of choice
@@ -108,6 +113,21 @@ class MyWindow(Gtk.ApplicationWindow):
             self.new_panel(panelmod.constructor)
 
         self.setup_actions()
+
+    def on_button_press(self, widget, event):
+        # Button 1 = left, 2 = middle, 3 = right
+        if event.button == 1:
+            # Ctrl+leftclick on a URL should open it
+            if event.get_state() & Gdk.ModifierType.CONTROL_MASK == Gdk.ModifierType.CONTROL_MASK:
+                url = self.term.hyperlink_check_event(event)
+                if url is None:
+                    url, tag = self.term.match_check_event(event)
+                if url:
+                    Gtk.show_uri(None, url, Gdk.CURRENT_TIME)
+                    return True  # Handled
+
+        return False
+        #self.term.do_button_press_event(widget, event)
 
     def new_panel(self, constructor):
         panel = constructor(self)
