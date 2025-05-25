@@ -15,6 +15,25 @@ from dbus.mainloop.glib import DBusGMainLoop
 from .utils import compress_user
 from .panels import pwd, git, files, dirstack
 
+TERM_COLORS = [  # Selenized white from https://gogh-co.github.io/Gogh/
+    '#ebebeb',
+    '#d6000c',
+    '#1d9700',
+    '#c49700',
+    '#0064e4',
+    '#dd0f9d',
+    '#00ad9c',
+    '#878787',
+    '#cdcdcd',
+    '#bf0000',
+    '#008400',
+    '#af8500',
+    '#0054cf',
+    '#c7008b',
+    '#009a8a',
+    '#282828',
+]
+
 class MyDBUSService(dbus.service.Object):
     def __init__(self, window):
         self.window = window
@@ -87,11 +106,12 @@ class MyWindow(Gtk.ApplicationWindow):
         
         self.add(lr_split)
         self.term = Vte.Terminal(allow_hyperlink=True)
+        self.term.set_colors(*self.prepare_colours())
         self.term.connect("child-exited", self.app.quit_on_signal)
         self.term.connect("button-press-event", self.on_button_press)
         PCRE2_MULTILINE = 0x00000400
         self.regex_tag_http = self.term.match_add_regex(
-            Vte.Regex.new_for_match("https?://[^\s]+", -1, PCRE2_MULTILINE), 0
+            Vte.Regex.new_for_match(r"https?://[^\s]+", -1, PCRE2_MULTILINE), 0
         )
         self.term.spawn_sync(Vte.PtyFlags.DEFAULT, 
                 None,     # CWD
@@ -113,6 +133,17 @@ class MyWindow(Gtk.ApplicationWindow):
             self.new_panel(panelmod.constructor)
 
         self.setup_actions()
+
+    @staticmethod
+    def prepare_colours():
+        res = [Gdk.RGBA() for _ in range(16)]
+        for rgba, hex in zip(res, TERM_COLORS):
+            rgba.parse(hex)
+
+        fg, bg = Gdk.RGBA(), Gdk.RGBA()
+        fg.parse('#474747')
+        bg.parse('#ffffff')
+        return fg, bg, res
 
     def on_button_press(self, widget, event):
         # Button 1 = left, 2 = middle, 3 = right
