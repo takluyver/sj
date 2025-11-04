@@ -2,14 +2,17 @@
 requires = ["flit_core >=2,<4"]
 build-backend = "flit_core.buildapi"
 
-[tool.flit.metadata]
-module = "sj"
-author = "Thomas Kluyver"
-author-email = "thomas@kluyver.me.uk"
-home-page = "https://github.com/takluyver/sj"
+[project]
+name = "sj"
+authors = [
+  {name = "Thomas Kluyver", email="thomas@kluyver.me.uk"}
+]
 classifiers = ["License :: OSI Approved :: MIT License"]
+dynamic=["version", "description"]
 
+[project.urls]
+Source = "https://github.com/takluyver/sj"
 
-[tool.flit.scripts]
+[project.scripts]
 sj-new = "sj.new:main"
 sj = "sj.control:main"
